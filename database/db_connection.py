@@ -12,12 +12,18 @@ db_host = os.getenv('DB_HOST')
 db_password = os.getenv('DB_PASSWORD')
 db_port = os.getenv('DB_PORT')
 
-try:
-    conn = psycopg2.connect(database=db_name, 
-                            user=db_user, 
-                            host=db_host,
-                            password=db_password,
-                            port=db_port)
-    print("Connection successful")
-except psycopg2.Error as e:
-    print(f"Error: Could not make connection to the database\n{e}")
+def DatabaseConnection():
+    try:
+        # Establish a connection to the database
+        connection = psycopg2.connect(
+            dbname=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port
+        )
+        print("Database connection successful")
+        return connection
+    except Exception as error:
+        print(f"Error connecting to database: {error}")
+        return None

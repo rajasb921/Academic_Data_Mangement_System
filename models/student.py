@@ -1,5 +1,5 @@
 from .user import User
-
+from tabulate import tabulate
 
 class Student(User):
     """
@@ -32,3 +32,32 @@ class Student(User):
             updateGPA(db_connection, self.id, gpa)
 
         return self.gpa
+    
+    def print_course_schedule(self, db_connection):
+        from database.db_operations import getCourseSchedule
+
+        # Fetch schedule
+        schedule = getCourseSchedule(db_connection, self.id)
+        if schedule is None:
+            print("Schedule not found")
+            return
+        
+        # Group courses by semester
+        semesters = {"F": [], "S": []}
+        for course in schedule:
+            semesters[course["semester"]].append([
+                course["course_code"], 
+                course["course_title"], 
+                course["credits"], 
+                f"{course['days']} {course['start_time'].strftime('%I:%M%p')}"
+            ])
+
+        # Define headers for the table
+        headers = ["Course", "Title", "Credits", "Time"]
+
+        # Print schedules for each semester
+        for sem, courses in semesters.items():
+            if courses:
+                print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
+                print(tabulate(courses, headers=headers, tablefmt="grid"))
+                print()

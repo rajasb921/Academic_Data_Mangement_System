@@ -58,7 +58,7 @@ class UniversityManagementSystem:
             choice = input("Enter your choice: ")
             
             if choice == '1':
-                self.view_course_schedule()
+                self.user.print_course_schedule(self.db_connection)
             elif choice == '2':
                 self.perform_what_if_analysis()
             elif choice == '3':

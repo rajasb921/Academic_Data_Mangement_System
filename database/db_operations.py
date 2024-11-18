@@ -102,7 +102,8 @@ def getGrades(db_connection, student_id):
     except Exception as e:
         print(f"An error occurred in db_operations.getUser: {e}")
         return None
-    
+
+# Update the GPA for a student
 def updateGPA(db_connection, student_id, new_gpa):
     try:
         with db_connection.cursor() as cursor:
@@ -125,3 +126,55 @@ def updateGPA(db_connection, student_id, new_gpa):
         print(f"An error occurred in db_operations.getUser: {e}")
         return None
 
+def getCourseSchedule(db_connection, student_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to fetch the schedule grouped by semester for the given student ID
+            query = """
+            SELECT 
+                e.student_id, 
+                c.course_prefix || ' ' || c.course_number AS course_code, 
+                c.title AS course_title, 
+                c.credits, 
+                c.days, 
+                c.start_time, 
+                c.semester
+            FROM 
+                enrollment e
+            JOIN 
+                course c
+            ON 
+                e.course_id = c.course_id
+            WHERE 
+                e.student_id = %s
+            ORDER BY 
+                c.semester, c.start_time;
+            """
+            # Execute the query with the provided student_id
+            cursor.execute(query, (student_id,))
+            
+            # Fetch all results
+            results = cursor.fetchall()
+
+            # Return the results as a list of dictionaries
+            schedule = [
+                {
+                    "student_id": row[0],
+                    "course_code": row[1],
+                    "course_title": row[2],
+                    "credits": row[3],
+                    "days": row[4],
+                    "start_time": row[5],
+                    "semester": row[6]
+                }
+                for row in results
+            ]
+
+            return schedule
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

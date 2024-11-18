@@ -3,13 +3,12 @@ import psycopg2
 # Retrieve userType, userID for a given email/password
 def getUser(db_connection, email, passwordHash):
     # List of tables to check 
-    tables = ['Users']
-
+    tables = ['advisor', 'staff', 'instructor', 'student']
     try:
         with db_connection.cursor() as cursor:
             for table in tables:
                 # Create the SQL query
-                query = f"SELECT '{table}' as userType, userid as userID FROM {table} WHERE email = %s AND password = %s"
+                query = f"SELECT '{table}' as userType, {table}_id as userID FROM {table} WHERE email = %s AND password = %s"
                 
                 # Execute the query
                 cursor.execute(query, (email, passwordHash))
@@ -31,11 +30,3 @@ def getUser(db_connection, email, passwordHash):
         print(f"An error occurred in db_operations.getUser: {e}")
         return None
     
-
-'''
-Testing getUser
-
-db_connection = dbc.DatabaseConnection()
-getUser(db_connection, 'rajasbhate@usf', '12345678')
-
-'''

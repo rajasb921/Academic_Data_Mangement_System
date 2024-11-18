@@ -4,8 +4,14 @@ from services.authentication import AuthenticationService
 
 class UniversityManagementSystem:
     def __init__(self):
+        self.db_connection = None
+        self.auth_service = None
         self.current_user = None
         self.user_role = None
+
+    def start(self):
+        self.db_connection = DatabaseConnection()
+        self.auth_service = AuthenticationService(self.db_connection)
 
     def login(self):
         """
@@ -13,23 +19,23 @@ class UniversityManagementSystem:
         Currently a placeholder for actual authentication logic
         """
         print("Welcome to University Management System")
-        username = input("Username: ")
+        email = input("Email: ")
         password = input("Password: ")
-        
+        user = self.auth_service.authenticate_user(email, password)
         # TODO: Implement actual authentication
-        print(f"Successfully logged in as: {username}")
+        print(f"Successfully logged in as: {user}")
         
         # Simulating role assignment
-        if username.startswith('U'):
+        if email.startswith('U'):
             self.user_role = 'student'
             self.student_main_menu()
-        elif username.startswith('I'):
+        elif email.startswith('I'):
             self.user_role = 'instructor'
             self.instructor_main_menu()
-        elif username.startswith('A'):
+        elif email.startswith('A'):
             self.user_role = 'advisor'
             self.advisor_main_menu()
-        elif username.startswith('S'):
+        elif email.startswith('S'):
             self.user_role = 'staff'
             self.staff_main_menu()
         else:
@@ -167,6 +173,7 @@ class UniversityManagementSystem:
 
 def main():
     university_system = UniversityManagementSystem()
+    university_system.start()
     university_system.login()
 
 if __name__ == "__main__":

@@ -1,13 +1,16 @@
 from database.db_connection import DatabaseConnection
 import database.db_operations as db_operations
 from services.authentication import AuthenticationService
+from models.student import Student
+from models.advisor import Advisor
+from models.staff import Staff
+from models.instructor import Instructor
 
 class UniversityManagementSystem:
     def __init__(self):
         self.db_connection = None
         self.auth_service = None
-        self.current_user = None
-        self.user_role = None
+        self.user = None
 
     def start(self):
         self.db_connection = DatabaseConnection()
@@ -16,27 +19,23 @@ class UniversityManagementSystem:
     def login(self):
         """
         Authentication method for the University Management System
-        Currently a placeholder for actual authentication logic
         """
         print("Welcome to University Management System")
-        email = input("Email: ")
-        password = input("Password: ")
-        user = self.auth_service.authenticate_user(email, password)
-        # TODO: Implement actual authentication
-        print(f"Successfully logged in as: {user}")
-        
-        # Simulating role assignment
-        if email.startswith('U'):
-            self.user_role = 'student'
+        while self.user is None:
+            email = input("Email: ")
+            password = input("Password: ")
+            user = self.auth_service.authenticate_user(email, password)
+            self.user = user
+            print("User Authentication failed!") if self.user is None else None
+
+        # Menus
+        if isinstance(self.user, Student):
             self.student_main_menu()
-        elif email.startswith('I'):
-            self.user_role = 'instructor'
+        elif isinstance(self.user, Instructor):
             self.instructor_main_menu()
-        elif email.startswith('A'):
-            self.user_role = 'advisor'
+        elif isinstance(self.user, Advisor):
             self.advisor_main_menu()
-        elif email.startswith('S'):
-            self.user_role = 'staff'
+        elif isinstance(self.user, Staff):
             self.staff_main_menu()
         else:
             print("Invalid user type")
@@ -63,7 +62,8 @@ class UniversityManagementSystem:
             elif choice == '2':
                 self.perform_what_if_analysis()
             elif choice == '3':
-                self.view_gpa()
+                gpa = self.user.get_gpa(self.db_connection)
+                print(f"Your current GPA is: {gpa:.1f}")
             elif choice == '4':
                 break
             else:

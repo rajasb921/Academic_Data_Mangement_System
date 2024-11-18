@@ -18,12 +18,10 @@ class AuthenticationService:
         passwordHash = passwordHash.hexdigest()
 
         # Use db_operations.getUser to retrieve the user
-        user = dbo.getUser(self.db_connection, email, passwordHash) # Just get password for now, since now accounts are saved with a hash
+        user = dbo.getUser(self.db_connection, email, passwordHash) 
 
-        # Will have to change this later so that we use the actual user models
-        if len(user) == 2:
-            print(f"User authenticated: {user}")
-            return user
-        else:
-            print("Authentication failed.")
-            return None
+        # Return user object
+        if user is None:
+            print("Error: User not found")
+        
+        return user

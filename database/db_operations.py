@@ -70,7 +70,6 @@ def getUser(db_connection, email, passwordHash):
         print(f"An error occurred in db_operations.getUser: {e}")
         return None
 
-
 # Get grades for a student
 def getGrades(db_connection, student_id):
     try:
@@ -126,7 +125,8 @@ def updateGPA(db_connection, student_id, new_gpa):
         print(f"An error occurred in db_operations.getUser: {e}")
         return None
 
-def getCourseSchedule(db_connection, student_id):
+# Get course schedule for student
+def getStudentCourseSchedule(db_connection, student_id):
     try:
         with db_connection.cursor() as cursor:
             # SQL query to fetch the schedule grouped by semester for the given student ID
@@ -168,6 +168,62 @@ def getCourseSchedule(db_connection, student_id):
                     "start_time": row[5],
                     "semester": row[6],
                     "grade":row[7]
+                }
+                for row in results
+            ]
+
+            return schedule
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# Get course schedule for instructor
+def getInstructorCourseSchedule(db_connection, instructor_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to fetch the schedule grouped by semester for the given instructor ID
+            query = """
+            SELECT 
+                c.instructor_id, 
+                c.course_prefix || ' ' || c.course_number AS course_code, 
+                c.title AS course_title, 
+                c.credits, 
+                c.days, 
+                c.start_time, 
+                c.end_time, 
+                c.semester, 
+                c.year, 
+                c.section_id
+            FROM 
+                course c
+            WHERE 
+                c.instructor_id = %s
+            ORDER BY 
+                c.year, c.semester, c.start_time;
+            """
+            # Execute the query with the provided instructor_id
+            cursor.execute(query, (instructor_id,))
+            
+            # Fetch all results
+            results = cursor.fetchall()
+
+            # Return the results as a list of dictionaries
+            schedule = [
+                {
+                    "instructor_id": row[0],
+                    "course_code": row[1],
+                    "course_title": row[2],
+                    "credits": row[3],
+                    "days": row[4],
+                    "start_time": row[5],
+                    "end_time": row[6],
+                    "semester": row[7],
+                    "year": row[8],
+                    "section_id": row[9],
                 }
                 for row in results
             ]

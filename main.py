@@ -26,8 +26,10 @@ class UniversityManagementSystem:
             password = input("Password: ")
             user = self.auth_service.authenticate_user(email, password)
             self.user = user
-            print("User Authentication failed!") if self.user is None else None
-
+            if self.user is None:
+                print("User Authentication failed!")
+                return
+        
         # Menus
         if isinstance(self.user, Student):
             self.student_main_menu()
@@ -133,14 +135,6 @@ class UniversityManagementSystem:
             else:
                 print("Invalid choice. Please try again.")
 
-    def view_course_schedule(self):
-        self.method_not_implemented()
-
-    def perform_what_if_analysis(self):
-        self.method_not_implemented()
-
-    def view_gpa(self):
-        self.method_not_implemented()
 
     # Instructor Menu and Methods
     def instructor_main_menu(self):
@@ -154,7 +148,7 @@ class UniversityManagementSystem:
             choice = input("Enter your choice: ")
             
             if choice == '1':
-                self.view_instructor_course_schedule()
+                self.user.print_course_schedule(self.db_connection)
             elif choice == '2':
                 self.view_student_performance()
             elif choice == '3':

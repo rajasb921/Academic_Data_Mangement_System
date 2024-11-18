@@ -37,10 +37,10 @@ class Student(User):
         return self.gpa
     
     def print_course_schedule(self, db_connection):
-        from database.db_operations import getCourseSchedule
+        from database.db_operations import getStudentCourseSchedule
 
         # Fetch schedule
-        schedule = getCourseSchedule(db_connection, self.id)
+        schedule = getStudentCourseSchedule(db_connection, self.id)
         if schedule is None:
             print("Schedule not found")
             return

@@ -16,6 +16,7 @@ class AuthenticationService:
         pwd = password+salt
         passwordHash = hashlib.sha256(pwd.encode())
         passwordHash = passwordHash.hexdigest()
+        # print(passwordHash)
 
         # Use db_operations.getUser to retrieve the user
         user = dbo.getUser(self.db_connection, email, passwordHash) 

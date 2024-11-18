@@ -60,7 +60,71 @@ class UniversityManagementSystem:
             if choice == '1':
                 self.user.print_course_schedule(self.db_connection)
             elif choice == '2':
-                self.perform_what_if_analysis()
+                # Perform what-if analysis
+                analysis_results = self.user.what_if_analysis(self.db_connection)
+                
+                # Print student's current status
+                print("\n=== What-If Analysis ===")
+                print(f"Student: {analysis_results['current_status']['student_name']}")
+                print(f"Current GPA: {analysis_results['current_status']['current_gpa']}")
+                print(f"Total Credits: {analysis_results['current_status']['total_credits']}")
+                
+                while True:
+                    print("\nWhat-If Analysis Options:")
+                    print("1. Project GPA with additional courses")
+                    print("2. Find path to target GPA")
+                    print("3. Return to main menu")
+                    
+                    analysis_choice = input("\nEnter your choice (1-3): ")
+                    
+                    if analysis_choice == '1':
+                        try:
+                            num_courses = int(input("\nEnter number of future courses to consider: "))
+                            if num_courses <= 0:
+                                print("Please enter a positive number of courses.")
+                                continue
+                            
+                            projection_scenarios = self.user.grade_analyzer.calculate_projected_gpa(num_courses)
+                            
+                            print("\nTop 5 Best Scenarios:")
+                            for i, scenario in enumerate(projection_scenarios[:5], 1):
+                                print(f"\nScenario {i}:")
+                                for course in scenario['courses']:
+                                    print(f"- Take a 3-credit course with grade {course['grade']}")
+                                print(f"Projected GPA: {scenario['projected_gpa']}")
+                            
+                            print("\nWorst Scenario:")
+                            worst = projection_scenarios[-1]
+                            for course in worst['courses']:
+                                print(f"- Take a 3-credit course with grade {course['grade']}")
+                            print(f"Projected GPA: {worst['projected_gpa']}")
+                            
+                        except ValueError:
+                            print("Please enter a valid number.")
+                            
+                    elif analysis_choice == '2':
+                        try:
+                            target_gpa = float(input("\nEnter your target GPA: "))
+                            if target_gpa < 0 or target_gpa > 4.0:
+                                print("Please enter a GPA between 0.0 and 4.0")
+                                continue
+                                
+                            solutions = self.user.grade_analyzer.find_courses_for_target_gpa(target_gpa)
+                            
+                            print(f"\nPaths to reach GPA of {target_gpa}:")
+                            if "message" in solutions[0]:
+                                print(solutions[0]["message"])
+                            else:
+                                for i, solution in enumerate(solutions, 1):
+                                    print(f"\nPath {i}:")
+                                    for course in solution['courses']:
+                                        print(f"- Take a {course['credits']}-credit course with grade {course['grade']}")
+                                    print(f"Resulting GPA: {solution['resulting_gpa']}")
+                            
+                        except ValueError:
+                            print("Please enter a valid GPA number.")
+                    else:
+                        break
             elif choice == '3':
                 gpa = self.user.get_gpa(self.db_connection)
                 print(f"Your current GPA is: {gpa:.1f}")

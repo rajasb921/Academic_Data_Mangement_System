@@ -138,7 +138,8 @@ def getCourseSchedule(db_connection, student_id):
                 c.credits, 
                 c.days, 
                 c.start_time, 
-                c.semester
+                c.semester,
+                e.grade
             FROM 
                 enrollment e
             JOIN 
@@ -165,7 +166,8 @@ def getCourseSchedule(db_connection, student_id):
                     "credits": row[3],
                     "days": row[4],
                     "start_time": row[5],
-                    "semester": row[6]
+                    "semester": row[6],
+                    "grade":row[7]
                 }
                 for row in results
             ]

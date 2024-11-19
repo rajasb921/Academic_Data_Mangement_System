@@ -159,14 +159,6 @@ class UniversityManagementSystem:
             else:
                 print("Invalid choice. Please try again.")
 
-    def view_instructor_course_schedule(self):
-        self.method_not_implemented()
-
-    def view_student_performance(self):
-        self.method_not_implemented()
-
-    def view_major_distribution(self):
-        self.method_not_implemented()
 
     # Advisor Menu and Methods
     def advisor_main_menu(self):
@@ -201,10 +193,70 @@ class UniversityManagementSystem:
                 print("Invalid choice. Please try again.")
 
     def manage_student_enrollment(self):
-        self.method_not_implemented()
+        while True:
+            print("\n--- Student Enrollement Menu ---")
+            print("1. Add Course")
+            print("2. Drop Course")
+            print("3. View Current Registration")
+            print("4. Back to Main Menu")
 
-    def view_student_summary(self):
-        self.method_not_implemented()
+            choice = input("Enter your choice: ")
+
+            if (choice == '1'):
+                student_id = " "
+                course_id = -1
+                while (student_id[0] != 'S'):
+                    student_id = input("Enter Student ID: ")
+                    if (student_id[0] == 'S'):
+                        break
+                    print("Invalid Student ID")
+
+                while (course_id == -1):
+                    course_id = int(input("Enter Course ID: "))
+                    if (course_id > 0):
+                        break
+                    print("Invalid Course ID")
+
+                self.user.add_course(self.db_connection, student_id, course_id)
+                break
+
+            elif (choice == '2'):
+                self.method_not_implemented()
+                break
+            elif (choice == '3'):
+                student_id = " "
+                while (student_id[0] != 'S'):
+                    student_id = input("Enter Student ID: ")
+                    schedule = self.user.view_registration(self.db_connection, student_id)
+                    if (schedule is not None):
+                        break
+                    print("Student registration not found")
+
+                # Group courses by semester
+                semesters = {"F": [], "S": []}
+                for course in schedule:
+                    semesters[course["semester"]].append([
+                        course["course_code"], 
+                        course["course_title"], 
+                        course["credits"], 
+                        f"{course['days']} {course['start_time'].strftime('%I:%M%p')}"
+                    ])
+
+                # Define headers for the table
+                headers = ["Course", "Title", "Credits", "Time"]
+
+                # Print schedules for each semester
+                print()
+                for sem, courses in semesters.items():
+                    if courses:
+                        print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
+                        print(tabulate(courses, headers=headers, tablefmt="grid"))
+                        print()
+                break
+            elif (choice == '4'):
+                break
+            else:
+                print("Invalid choice. Please try again")
 
     # Staff Menu and Methods
     def staff_main_menu(self):

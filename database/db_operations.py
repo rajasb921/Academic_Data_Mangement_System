@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from models.student import Student
 from models.advisor import Advisor
 from models.instructor import Instructor
@@ -388,3 +389,46 @@ def getStudentSummary(db_connection, student_id):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+    
+
+def studentCourseAdd(db_connection, student_id, course_id):
+    try:
+
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Get the credits for the course
+            cursor.execute("""
+                SELECT credits
+                FROM course
+                WHERE course_id = %s
+            """, (course_id,))
+            course = cursor.fetchone()
+            
+            if not course:
+                print("Course not found")
+                return False
+            
+            course_credits = course['credits']
+
+            # Insert into enrollment table
+            cursor.execute("""
+                INSERT INTO enrollment (student_id, course_id) 
+                VALUES (%s, %s)
+            """, (student_id, course_id))
+
+            # Update student's total credits
+            cursor.execute("""
+                UPDATE student
+                SET total_credits = total_credits + %s
+                WHERE student_id = %s
+            """, (course_credits, student_id))
+
+            # Explicitly commit the transaction
+            db_connection.commit()
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False

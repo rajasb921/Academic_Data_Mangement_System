@@ -28,4 +28,30 @@ class Advisor(User):
         
 
         return summary
+    
+
+    def add_course(self, db_connection, student_id, course_id):
+        from database.db_verification import checkCourseAdd
+        from database.db_operations import studentCourseAdd
+        if not checkCourseAdd(db_connection, student_id, course_id):
+            print("Course Add Failed")
+            return None
         
+        flag = studentCourseAdd(db_connection, student_id, course_id)
+        if flag:
+            print("Course added successfully")
+            return None
+    
+    def drop_course(self, db_connection, student_id, course_id):
+        return None
+    
+    def view_registration(self, db_connection, student_id):
+        from database.db_operations import getStudentCourseSchedule
+
+        # Fetch schedule
+        schedule = getStudentCourseSchedule(db_connection, student_id)
+        if schedule is None:
+            print("Schedule not found")
+            return
+        
+        return schedule

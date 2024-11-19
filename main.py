@@ -152,7 +152,7 @@ class UniversityManagementSystem:
             elif choice == '2':
                 self.user.print_student_performance(self.db_connection)
             elif choice == '3':
-                self.view_major_distribution()
+                self.user.print_major_distribution(self.db_connection)
             elif choice == '4':
                 break
             else:

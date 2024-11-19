@@ -299,3 +299,54 @@ def getPerformance(db_connection, course_id):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
+
+# Get major distribution
+def getMajorDistribution(db_connection, course_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # Define the SQL query to get major distribution
+            query = """
+                SELECT 
+                    m.major_name,
+                    COUNT(e.student_id) AS num_students,
+                    ROUND(COUNT(e.student_id) * 100.0 / SUM(COUNT(e.student_id)) OVER (), 2) AS percentage
+                FROM 
+                    public.enrollment e
+                JOIN 
+                    public.student s ON e.student_id = s.student_id
+                JOIN 
+                    public.course c ON e.course_id = c.course_id
+                JOIN 
+                    public.major m ON s.major_id = m.major_id
+                WHERE
+                    c.course_id = %s
+                GROUP BY 
+                    m.major_name
+                ORDER BY 
+                    num_students DESC;
+            """
+            # Execute the query with the given course_id
+            cursor.execute(query, (course_id,))
+            results = cursor.fetchall()
+            
+            if results:
+                # Process the results
+                major_distribution = [
+                    {
+                        "major": result[0],
+                        "num_students": result[1],
+                        "percentage": result[2]
+                    } for result in results
+                ]
+                return major_distribution
+            else:
+                print("No major distribution data found for the given course ID.")
+                return None
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

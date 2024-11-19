@@ -42,3 +42,44 @@ class Instructor(User):
                 print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
                 print(tabulate(courses, headers=headers, tablefmt="grid"))
                 print()
+    
+    def print_student_performance(self, db_connection):
+        from database.db_operations import getInstructorCourseSchedule
+        from database.db_operations import getPerformance
+
+        schedule = getInstructorCourseSchedule(db_connection, self.id)
+        if schedule is None:
+            print("Schedule not found")
+            return
+        
+        performances = []
+        for course in schedule:
+
+            performance = getPerformance(db_connection, course["course_id"])
+            performances.append({
+                "course_code": course["course_code"],
+                "course_title": course["course_title"], 
+                "performance": performance
+            })
+
+            # Process and display the performance data
+            headers = ["Course", "Students", "Avg Grade", "A", "B", "C", "D", "F"]
+            table = []
+            for perf in performances:
+                performance = perf["performance"]
+                avg_grade_percentage = performance["avg_grade"] * 20  # Assuming GPA is out of 4.0
+                table.append([
+                    perf["course_code"],
+                    performance["num_students"],
+                    avg_grade_percentage,
+                    performance["num_A"],
+                    performance["num_B"],
+                    performance["num_C"],
+                    performance["num_D"],
+                    performance["num_F"]
+                ])
+
+            print(tabulate(table, headers=headers, tablefmt="grid"))
+            print()
+
+        

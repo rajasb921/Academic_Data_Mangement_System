@@ -197,7 +197,8 @@ def getInstructorCourseSchedule(db_connection, instructor_id):
                 c.end_time, 
                 c.semester, 
                 c.year, 
-                c.section_id
+                c.section_id,
+                c.course_id
             FROM 
                 course c
             WHERE 
@@ -224,11 +225,73 @@ def getInstructorCourseSchedule(db_connection, instructor_id):
                     "semester": row[7],
                     "year": row[8],
                     "section_id": row[9],
+                    "course_id":row[10]
                 }
                 for row in results
             ]
 
             return schedule
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# Get performance of students in a specific course
+def getPerformance(db_connection, course_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # Define the SQL query
+            query = """
+                SELECT 
+                    c.course_prefix || c.course_number AS course,
+                    COUNT(e.student_id) AS num_students,
+                    AVG(CASE 
+                            WHEN e.grade = 'A' THEN 4
+                            WHEN e.grade = 'B' THEN 3
+                            WHEN e.grade = 'C' THEN 2
+                            WHEN e.grade = 'D' THEN 1
+                            WHEN e.grade = 'F' THEN 0
+                            ELSE NULL 
+                        END) AS avg_grade,
+                    SUM(CASE WHEN e.grade = 'A' THEN 1 ELSE 0 END) AS num_A,
+                    SUM(CASE WHEN e.grade = 'B' THEN 1 ELSE 0 END) AS num_B,
+                    SUM(CASE WHEN e.grade = 'C' THEN 1 ELSE 0 END) AS num_C,
+                    SUM(CASE WHEN e.grade = 'D' THEN 1 ELSE 0 END) AS num_D,
+                    SUM(CASE WHEN e.grade = 'F' THEN 1 ELSE 0 END) AS num_F
+                FROM 
+                    public.course c
+                JOIN 
+                    public.enrollment e ON c.course_id = e.course_id
+                WHERE
+                    c.course_id = %s
+                GROUP BY 
+                    c.course_prefix, c.course_number
+                ORDER BY 
+                    c.course_prefix, c.course_number;
+            """
+            # Execute the query with the given course_id
+            cursor.execute(query, (course_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                # Process the results
+                performance = {
+                    "course": result[0],
+                    "num_students": result[1],
+                    "avg_grade": result[2],
+                    "num_A": result[3],
+                    "num_B": result[4],
+                    "num_C": result[5],
+                    "num_D": result[6],
+                    "num_F": result[7]
+                }
+                return performance
+            else:
+                print("No performance data found for the given course ID.")
+                return None
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")

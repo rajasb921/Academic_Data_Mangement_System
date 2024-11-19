@@ -150,7 +150,7 @@ class UniversityManagementSystem:
             if choice == '1':
                 self.user.print_course_schedule(self.db_connection)
             elif choice == '2':
-                self.view_student_performance()
+                self.user.print_student_performance(self.db_connection)
             elif choice == '3':
                 self.view_major_distribution()
             elif choice == '4':

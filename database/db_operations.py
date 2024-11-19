@@ -350,3 +350,41 @@ def getMajorDistribution(db_connection, course_id):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+    
+# Student summary
+def getStudentSummary(db_connection, student_id):
+    try:
+        with db_connection.cursor() as cursor:
+            query = """
+            SELECT 
+                first_name || ' ' || last_name AS full_name,
+                m.major_name AS major,
+                s.total_credits AS completed_credits,
+                s.gpa
+            FROM 
+                public.student s
+            JOIN 
+                public.major m ON s.major_id = m.major_id
+            WHERE 
+                s.student_id = %s
+            """
+            cursor.execute(query, (student_id,))
+            
+            result = cursor.fetchone()
+            
+            if result:
+                return {
+                    'name': result[0],
+                    'major': result[1],
+                    'completed_credits': result[2],
+                    'gpa': result[3]
+                }
+            else:
+                return None
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

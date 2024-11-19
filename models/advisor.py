@@ -1,4 +1,6 @@
 from .user import User
+from tabulate import tabulate
+
 class Advisor(User):
     """
     Advisor class representing a university advisor
@@ -15,3 +17,15 @@ class Advisor(User):
         """
         super().__init__(advisor_id, email, first_name, last_name)
         self.phone_number = phone_number
+    
+    def get_student_summary(self, db_connection, student_id):
+        from database.db_operations import getStudentSummary
+
+        summary = getStudentSummary(db_connection, student_id)
+        if summary is None:
+            print("Summary not found")
+            return None
+        
+
+        return summary
+        

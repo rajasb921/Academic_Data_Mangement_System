@@ -5,6 +5,7 @@ from models.student import Student
 from models.advisor import Advisor
 from models.staff import Staff
 from models.instructor import Instructor
+from tabulate import tabulate
 
 class UniversityManagementSystem:
     def __init__(self):
@@ -180,7 +181,20 @@ class UniversityManagementSystem:
             if choice == '1':
                 self.manage_student_enrollment()
             elif choice == '2':
-                self.view_student_summary()
+                student_id = " "
+                while (student_id[0] != 'S'):
+                    student_id = input("Enter Student ID: ")
+                    summary = self.user.get_student_summary(self.db_connection, student_id)
+                    if (summary is not None):
+                        break
+                    print("Invalid Student ID!")
+                
+                print()
+                print(f"Summary for student: {summary['name']}")
+                headers = ["Name", "Major", "Completed Credits", "GPA"]
+                table = [[summary['name'], summary['major'], summary['completed_credits'], summary['gpa']]]
+                print(tabulate(table, headers, tablefmt="grid"))
+                
             elif choice == '3':
                 break
             else:

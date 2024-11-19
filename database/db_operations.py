@@ -390,7 +390,7 @@ def getStudentSummary(db_connection, student_id):
         print(f"An error occurred: {e}")
         return None
     
-
+# Add a student to a course
 def studentCourseAdd(db_connection, student_id, course_id):
     try:
 
@@ -419,6 +419,49 @@ def studentCourseAdd(db_connection, student_id, course_id):
             cursor.execute("""
                 UPDATE student
                 SET total_credits = total_credits + %s
+                WHERE student_id = %s
+            """, (course_credits, student_id))
+
+            # Explicitly commit the transaction
+            db_connection.commit()
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+
+
+# Drop a student from a course
+def studentCourseDrop(db_connection, student_id, course_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Get the credits for the course
+            cursor.execute("""
+                SELECT credits
+                FROM course
+                WHERE course_id = %s
+            """, (course_id,))
+            course = cursor.fetchone()
+            
+            if not course:
+                print("Course not found")
+                return False
+            
+            course_credits = course['credits']
+
+            # Delete from enrollment table
+            cursor.execute("""
+                DELETE FROM enrollment 
+                WHERE student_id = %s AND course_id = %s
+            """, (student_id, course_id))
+
+            # Update student's total credits
+            cursor.execute("""
+                UPDATE student
+                SET total_credits = total_credits - %s
                 WHERE student_id = %s
             """, (course_credits, student_id))
 

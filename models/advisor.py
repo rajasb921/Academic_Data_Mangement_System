@@ -43,7 +43,16 @@ class Advisor(User):
             return None
     
     def drop_course(self, db_connection, student_id, course_id):
-        return None
+        from database.db_verification import checkCourseDrop
+        from database.db_operations import studentCourseDrop
+        if not checkCourseDrop(db_connection, student_id, course_id):
+            print("Course Drop Failed")
+            return None
+        
+        flag = studentCourseDrop(db_connection, student_id, course_id)
+        if flag:
+            print("Course dropped successfully")
+            return None
     
     def view_registration(self, db_connection, student_id):
         from database.db_operations import getStudentCourseSchedule

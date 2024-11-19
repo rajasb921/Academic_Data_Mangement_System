@@ -71,8 +71,8 @@ def checkAvailability(db_connection, student_id, course_id):
         print(f"An error occurred: {e}")
         return None
 
-# Check credits
-def checkCredits(db_connection, student_id, course_id):
+# Check whether credits will exceed 18 when adding a course
+def willExceedCredits(db_connection, student_id, course_id):
     try:
         with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
             # Get current enrolled credits for the student
@@ -101,9 +101,9 @@ def checkCredits(db_connection, student_id, course_id):
 
             # Check if total credits would exceed 18
             if current_enrolled_credits + new_course_credits > 18:
-                return False
+                return True
             
-            return True
+            return False
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")
@@ -112,7 +112,48 @@ def checkCredits(db_connection, student_id, course_id):
         print(f"An error occurred: {e}")
         return None
 
-# Verify whether the student can take a give course
+# Check whether the credits will be 0 when deleting a course
+def noCredits(db_connection, student_id, course_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Get current enrolled credits for the student
+            cursor.execute("""
+                SELECT SUM(c.credits) AS current_enrolled_credits
+                FROM enrollment e
+                JOIN course c ON e.course_id = c.course_id
+                WHERE e.student_id = %s
+            """, (student_id,))
+            current_credits_result = cursor.fetchone()
+            current_enrolled_credits = current_credits_result['current_enrolled_credits'] or 0
+
+            # Get credits for the course to be deleted
+            cursor.execute("""
+                SELECT credits
+                FROM course
+                WHERE course_id = %s
+            """, (course_id,))
+            course_to_delete = cursor.fetchone()
+            
+            if not course_to_delete:
+                # Course not found
+                return False
+            
+            course_to_delete_credits = course_to_delete['credits']
+
+            # Check if total credits would be 0 after deletion
+            if current_enrolled_credits - course_to_delete_credits == 0:
+                return True
+            
+            return False
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# Verify whether the student can take a given course
 def checkCourseAdd(db_connection, student_id, course_id):
     enrolled = isEnrolled(db_connection, student_id, course_id)
     if enrolled:
@@ -126,10 +167,26 @@ def checkCourseAdd(db_connection, student_id, course_id):
         return False
     print("Student has availability in their schedule")
 
-    credits = checkCredits(db_connection, student_id, course_id)
-    if not credits:
+    credits = willExceedCredits(db_connection, student_id, course_id)
+    if credits:
         print("Student will exceed maximum 18 credit limit")
         return False
     print("Student will not exceed 18 credit limit")
+
+    return True
+
+# Verify whether a student can drop a given course
+def checkCourseDrop(db_connection, student_id, course_id):
+    enrolled = isEnrolled(db_connection, student_id, course_id)
+    if not enrolled:
+        print("Student is not enrolled in this course")
+        return False
+    print("Student is currently enrolled in the course")
+
+    no_credits = noCredits(db_connection, student_id, course_id)
+    if no_credits:
+        print("Student will have 0 credits after dropping this course")
+        return False
+    print("Student will not have 0 credits after dropping this course")
 
     return True

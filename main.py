@@ -221,7 +221,21 @@ class UniversityManagementSystem:
                 break
 
             elif (choice == '2'):
-                self.method_not_implemented()
+                student_id = " "
+                course_id = -1
+                while (student_id[0] != 'S'):
+                    student_id = input("Enter Student ID: ")
+                    if (student_id[0] == 'S'):
+                        break
+                    print("Invalid Student ID")
+
+                while (course_id == -1):
+                    course_id = int(input("Enter Course ID: "))
+                    if (course_id > 0):
+                        break
+                    print("Invalid Course ID")
+
+                self.user.drop_course(self.db_connection, student_id, course_id)
                 break
             elif (choice == '3'):
                 student_id = " "

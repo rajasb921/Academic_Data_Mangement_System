@@ -20,9 +20,12 @@ class GradeAnalyzer:
         # Only need: course credits and grade
         self.completed_courses = []
 
+        # Bad field but makes the code easy
+        self.data_affected = []
+
     def load_completed_courses(self, db_connection):
-        from database.db_operations import getCourseSchedule
-        schedule = getCourseSchedule(db_connection, self.student_id)
+        from database.db_operations import getStudentCourseSchedule
+        schedule, self.data_affected = getStudentCourseSchedule(db_connection, self.student_id)
         if schedule:
             self.completed_courses = [
                 {

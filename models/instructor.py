@@ -18,7 +18,7 @@ class Instructor(User):
         from database.db_operations import getInstructorCourseSchedule
 
         # Fetch instructor schedule
-        schedule = getInstructorCourseSchedule(db_connection, self.id)
+        schedule, data_affected = getInstructorCourseSchedule(db_connection, self.id)
         if schedule is None:
             print("Schedule not found")
             return
@@ -42,7 +42,49 @@ class Instructor(User):
                 print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
                 print(tabulate(courses, headers=headers, tablefmt="grid"))
                 print()
-    
+
+        # Log
+        self.logger.log(self.id, 'read', data_affected)
+        
+    def print_student_performance(self, db_connection, course_id):
+        from database.db_verification import instructorTeachesCourse
+        from database.db_operations import getPerformance
+
+        if not instructorTeachesCourse(db_connection, self.id, course_id):
+            print("Instructor does not teach this course")
+            return None
+        
+        # Fetch course summary
+        course_summary, data_affected = getPerformance(db_connection, course_id)
+        if course_summary is None:
+            print("Course summary not found")
+            return
+        
+        # Convert average grade to percentage
+        avg_percentage = float(course_summary['avg_grade']) * 25  # Assuming 4.0 scale = 100%
+
+        # Prepare summary data for tabulation
+        summary_data = [
+            ["Course", course_summary['course']],
+            ["Total Students", course_summary['num_students']],
+            ["Average Grade", f"{avg_percentage:.2f}%"],
+            ["Grade Distribution", 
+            f"A: {course_summary['num_A']}, "
+            f"B: {course_summary['num_B']}, "
+            f"C: {course_summary['num_C']}, "
+            f"D: {course_summary['num_D']}, "
+            f"F: {course_summary['num_F']}"]
+        ]
+
+        # Print summary
+        print(f"--- Course Summary ---")
+        print(tabulate(summary_data, tablefmt="grid"))
+        print()
+
+        # Log
+        self.logger.log(self.id, 'read', data_affected)
+        
+        
     def print_major_distribution(self, db_connection):
         from database.db_operations import getInstructorCourseSchedule
         from database.db_operations import getMajorDistribution

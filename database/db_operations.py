@@ -91,10 +91,11 @@ def getGrades(db_connection, student_id):
             
             # Return the grades if any are found
             if grades:
-                return grades
+                data_affected = ["student.student_id", "enrollment.course_id", "course.course_id"]
+                return grades, data_affected
             else:
                 print(f"No grades found for student_id {student_id}")
-                return None
+                return None, None
     
     except psycopg2.Error as e:
         print(f"Database error: {e}")
@@ -172,8 +173,9 @@ def getStudentCourseSchedule(db_connection, student_id):
                 }
                 for row in results
             ]
-
-            return schedule
+            
+            data_affected = ["enrollment.student_id", "course.course_id"]
+            return schedule, data_affected
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")
@@ -231,7 +233,8 @@ def getInstructorCourseSchedule(db_connection, instructor_id):
                 for row in results
             ]
 
-            return schedule
+            data_affected = ["course.instructor_id", "course.course_id"]
+            return schedule, data_affected
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")
@@ -289,7 +292,8 @@ def getPerformance(db_connection, course_id):
                     "num_D": result[6],
                     "num_F": result[7]
                 }
-                return performance
+                data_affected = ["course.course_id", "enrollment.student_id"]
+                return performance, data_affected
             else:
                 print("No performance data found for the given course ID.")
                 return None

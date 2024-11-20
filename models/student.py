@@ -19,7 +19,7 @@ class Student(User):
         from database.db_operations import getGrades
         from database.db_operations import updateGPA
         # Fetch latest gpa
-        grades = getGrades(db_connection, self.id)
+        grades, data_affected = getGrades(db_connection, self.id)
 
         gpa_map = {'A': 4.0, 'B': 3.0, 'C': 2.0, 'D': 1.0, 'F': 0.0}
         total_points = 0
@@ -34,13 +34,16 @@ class Student(User):
             self.gpa = gpa
             updateGPA(db_connection, self.id, gpa)
 
+
+        # Log the operation
+        self.logger.log(self.id, 'read', data_affected)
         return self.gpa
     
     def print_course_schedule(self, db_connection):
         from database.db_operations import getStudentCourseSchedule
 
         # Fetch schedule
-        schedule = getStudentCourseSchedule(db_connection, self.id)
+        schedule, data_affected = getStudentCourseSchedule(db_connection, self.id)
         if schedule is None:
             print("Schedule not found")
             return
@@ -64,6 +67,9 @@ class Student(User):
                 print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
                 print(tabulate(courses, headers=headers, tablefmt="grid"))
                 print()
+
+        # Log the operation
+        self.logger.log(self.id, 'read', data_affected)
 
     def what_if_analysis(self, db_connection):
         """
@@ -126,5 +132,7 @@ class Student(User):
             }
         ])
 
+        # Log the operation
+        self.logger.log(self.id, 'read', self.grade_analyzer.data_affected)
         return results
 

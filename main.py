@@ -12,11 +12,11 @@ class UniversityManagementSystem:
         self.db_connection = None
         self.auth_service = None
         self.user = None
+        self.logger = None
 
     def start(self):
         self.db_connection = DatabaseConnection()
         self.auth_service = AuthenticationService(self.db_connection)
-
     def login(self):
         """
         Authentication method for the University Management System
@@ -151,7 +151,8 @@ class UniversityManagementSystem:
             if choice == '1':
                 self.user.print_course_schedule(self.db_connection)
             elif choice == '2':
-                self.user.print_student_performance(self.db_connection)
+                course_id = input("Enter Course ID: ")
+                self.user.print_student_performance(self.db_connection, course_id)
             elif choice == '3':
                 self.user.print_major_distribution(self.db_connection)
             elif choice == '4':

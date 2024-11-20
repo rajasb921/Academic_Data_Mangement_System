@@ -1,3 +1,4 @@
+from services.log import FileLogger
 class User:
     def __init__(self, user_id, email, first_name, last_name):
         """
@@ -12,7 +13,8 @@ class User:
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
-    
+        self.logger = FileLogger()
+
     def __repr__(self):
         """
         Provide a string representation of the User instance.
@@ -23,3 +25,4 @@ class User:
     
     def get_full_name(self):
         return self.first_name + " " + self.last_name
+    

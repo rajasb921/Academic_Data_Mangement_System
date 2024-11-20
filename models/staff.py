@@ -146,6 +146,7 @@ class Staff(User):
         from database.db_verification import checkCourseModify
         from database.db_operations import modifyCourse
 
+
         if not checkCourseModify(db_connection, course_prefix, course_number, new_course_name, new_credits):
             print("Course cannot be modified")
             return False
@@ -155,4 +156,19 @@ class Staff(User):
             return True
 
         print("Failed to modify course")
+        return False
+    
+    def delete_course(self, db_connection, course_prefix, course_number):
+        from database.db_verification import checkCourseDelete
+        from database.db_operations import deleteCourse
+        
+        if not checkCourseDelete(db_connection, course_prefix, course_number):
+            print("Course cannot be deleted")
+            return False
+
+        if deleteCourse(db_connection, course_prefix, course_number):
+            print("Course deleted")
+            return True
+
+        print("Failed to delete course")
         return False

@@ -410,11 +410,12 @@ class UniversityManagementSystem:
                     print("Invalid input: Credits must be a positive number.")
 
             elif choice == '3':
-                course_code = input("Enter the course code to delete: ")
-                confirmation = input(f"Are you sure you want to delete the course '{course_code}'? (yes/no): ").lower()
+                course_prefix = input("Enter the course prefix to delete: ")
+                course_number = input("Enter course number: ")
+                confirmation = input(f"Are you sure you want to delete the course '{course_prefix} {course_number}'? (yes/no): ").lower()
                 
                 if confirmation == 'yes':
-                    self.user.delete_course(self.db_connection, course_code)
+                    self.user.delete_course(self.db_connection, course_prefix, course_number)
                     print("Course deleted successfully.")
                 else:
                     print("Course deletion canceled.")

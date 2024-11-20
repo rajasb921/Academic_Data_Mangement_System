@@ -367,3 +367,59 @@ def checkCourseModify(db_connection, course_prefix, course_number, new_course_na
         return False
 
     return True
+
+# Check number of students in a course
+def numStudentsInCourse(db_connection, course_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM enrollment
+                WHERE course_id = %s
+            """
+            cursor.execute(query, (course_id,))
+            result = cursor.fetchone()
+            return result['count']
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# Verify whether a course can be deleted
+def checkCourseDelete(db_connection, course_prefix, course_number):
+    if not courseExists(db_connection, course_prefix, course_number):
+        print("Course does not exist")
+        return False
+    print("Course exists")
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT course_id
+                FROM course
+                WHERE course_prefix = %s AND course_number = %s
+            """
+            cursor.execute(query, (course_prefix, course_number))
+            course = cursor.fetchone()
+            
+            if not course:
+                print("Course not found")
+                return False
+            
+            course_id = int(course['course_id'])
+            num_students = numStudentsInCourse(db_connection, course_id)
+
+            if num_students > 0:
+                print(f"Course has {num_students} students enrolled")
+                return False
+            print("Course has no students enrolled")
+            
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None

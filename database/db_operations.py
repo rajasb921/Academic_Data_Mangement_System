@@ -694,3 +694,30 @@ def modifyCourse(db_connection, course_prefix, course_number, new_course_name, n
         print(f"An error occurred: {e}")
         db_connection.rollback()  # Rollback on error
         return False
+
+# Delete course
+def deleteCourse(db_connection, course_prefix, course_number):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to delete the course from the course table
+            query = """
+                DELETE FROM course
+                WHERE course_prefix = %s AND course_number = %s;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (course_prefix, course_number))
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully deleted course '{course_prefix} {course_number}'")
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False

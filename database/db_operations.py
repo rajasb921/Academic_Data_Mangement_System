@@ -580,3 +580,58 @@ def modifyMajor(db_connection, department_id, major_name, new_major_name, new_cr
         print(f"An error occurred: {e}")
         db_connection.rollback()  # Rollback on error
         return False
+    
+# Delete and instructor from a department
+def deleteInstructor(db_connection, department_id, instructor_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to delete the instructor from the instructor table
+            query = """
+                DELETE FROM instructor
+                WHERE department_id = %s AND instructor_id = %s;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (department_id, instructor_id))
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully deleted instructor with ID: {instructor_id} from department ID: {department_id}")
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    
+# Add a new instructor for a given course
+def updateCourseForInstructor(db_connection, department_id, instructor_id, course_id):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to update the course with the new instructor
+            query = """
+                UPDATE course
+                SET instructor_id = %s
+                WHERE course_id = %s;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (instructor_id, course_id))
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully assigned instructor ID: {instructor_id} to course ID: {course_id}")
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False

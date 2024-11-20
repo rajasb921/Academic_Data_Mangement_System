@@ -43,7 +43,7 @@ class Staff(User):
     def modify_major(self, db_connection, major_name, new_major_name, new_credits):
         from database.db_verification import checkMajorModify
         from database.db_operations import modifyMajor
-        
+
         if not checkMajorModify(db_connection, self.department_id, major_name, new_major_name, new_credits):
             print("Major cannot be modified")
             return False
@@ -52,4 +52,72 @@ class Staff(User):
             print("Major modified")
             return True
         
+        return False
+    
+    def view_instructor_schedule(self, db_connection, instructor_id):
+        from database.db_verification import checkInstructorDept
+        from database.db_operations import getInstructorCourseSchedule
+
+        if not checkInstructorDept(db_connection, self.department_id, instructor_id):
+            print("Instructor does not belong to your department")
+            return
+        
+        schedule = getInstructorCourseSchedule(db_connection, instructor_id)
+        if schedule:
+            headers = ["Course", "Title", "Credits", "Time"]
+            courses = [
+                [
+                    course["course_code"],
+                    course["course_title"],
+                    course["credits"],
+                    f"{course['days']} {course['start_time'].strftime('%I:%M%p')}"
+                ]
+            for course in schedule]
+            print(tabulate(courses, headers=headers, tablefmt="grid"))
+        else:
+            print("No schedule found for the given instructor ID.")
+
+    def delete_instructor(self, db_connection, instructor_id):
+        from database.db_verification import checkInstructorDelete
+        from database.db_operations import deleteInstructor
+
+        if not checkInstructorDelete(db_connection, self.department_id, instructor_id):
+            print("Instructor cannot be deleted")
+            return False
+
+        if deleteInstructor(db_connection, self.department_id, instructor_id):
+            print("Instructor deleted")
+            return True
+        
+        print("Failed to delete instructor")
+        return False
+    
+    def update_course_for_instructor(self, db_connection, instructor_id, course_id):
+        from database.db_verification import checkCourseUpdate
+        from database.db_operations import updateCourseForInstructor
+
+        if not checkCourseUpdate(db_connection, self.department_id, instructor_id, course_id):
+            print("Course cannot be added for the instructor")
+            return False
+
+        if updateCourseForInstructor(db_connection, self.department_id, instructor_id, course_id):
+            print("Course added for the instructor")
+            return True
+
+        print("Failed to add course for the instructor")
+        return False
+    
+    def delete_course_for_instructor(self, db_connection, instructor_id, course_id):
+        from database.db_verification import checkCourseDelete
+        from database.db_operations import deleteCourseForInstructor
+
+        if not checkCourseDelete(db_connection, self.department_id, instructor_id, course_id):
+            print("Course cannot be deleted for the instructor")
+            return False
+
+        if deleteCourseForInstructor(db_connection, self.department_id, instructor_id, course_id):
+            print("Course deleted for the instructor")
+            return True
+
+        print("Failed to delete course for the instructor")
         return False

@@ -238,3 +238,86 @@ def checkMajorModify(db_connection, department_id, major_name, new_major_name, n
         return False
 
     return True
+
+# Counts number of courses an instructor teaches
+def countCourses(db_connection, instructor_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM course
+                WHERE instructor_id = %s
+            """
+            cursor.execute(query, (instructor_id,))
+            result = cursor.fetchone()
+            return result['count']
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Verify whether an instructor belongs to a particular department
+def checkInstructorDept(db_connection, department_id, instructor_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM instructor
+                WHERE department_id = %s AND instructor_id = %s
+            """
+            cursor.execute(query, (department_id, instructor_id))
+            result = cursor.fetchone()
+            return result['count'] > 0
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Verify whether an instructor can be deleted
+def checkInstructorDelete(db_connection, department_id, instructor_id):
+    if not checkInstructorDept(db_connection, department_id, instructor_id):
+        print("Instructor does not belong to the specified department")
+        return False
+    print("Instructor belongs to the specified department")
+
+    courses_count = countCourses(db_connection, instructor_id)
+    if courses_count > 0:
+        print("Instructor is currently teaching courses")
+        return False
+    print("Instructor is not teaching any courses")
+
+    return True
+
+# Verify whether an instructor teaches a course
+def instructorTeachesCourse(db_connection, instructor_id, course_id):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM course
+                WHERE instructor_id = %s AND course_id = %s
+            """
+            cursor.execute(query, (instructor_id, course_id))
+            result = cursor.fetchone()
+            return result['count'] > 0
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Verify whether an instructor can teach a course
+def checkCourseUpdate(db_connection, department_id, instructor_id, course_id):
+
+    if instructorTeachesCourse(db_connection, instructor_id, course_id):
+        print("Instructor already teaches this course")
+        return False
+    print("Instructor does not teach this course")
+
+    return True
+

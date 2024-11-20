@@ -320,7 +320,7 @@ class UniversityManagementSystem:
                 
                 new_credits = int(new_credits)
                 self.user.modify_major(self.db_connection, major_name, new_major_name, new_credits)
-                
+
             elif (choice == '3'):
                 break
             else:
@@ -328,7 +328,48 @@ class UniversityManagementSystem:
 
 
     def instructor_management(self):
-        self.method_not_implemented()
+        while True:
+            print("\n--- Instructor Management Menu ---")
+            print("1. Delete Instructor")
+            print("2. Update Course for Instructor")
+            print("3. View Instructor Schedule")
+            print("4. Back to Main Menu")
+
+            choice = input("Enter your choice: ")
+
+            if choice == '1':
+                instructor_id = " "
+                while (instructor_id[0] != 'I'):
+                    instructor_id = input("Enter Instructor ID: ")
+                    if (instructor_id[0] != 'I'):
+                        print("Invalid ID")
+                self.user.delete_instructor(self.db_connection, instructor_id)
+            elif choice == '2':
+                instructor_id = " "
+                course_id = -1
+                while (instructor_id[0] != 'I'):
+                    instructor_id = input("Enter Instructor ID: ")
+                    if (instructor_id[0] == 'I'):
+                        break
+                    print("Invalid Instructor ID")
+
+                while (course_id == -1):
+                    course_id = int(input("Enter Course ID: "))
+                    if (course_id > 0):
+                        break
+                    print("Invalid Course ID")
+                self.user.update_course_for_instructor(self.db_connection, instructor_id, course_id)
+            elif choice == '3':
+                instructor_id = " "
+                while (instructor_id[0] != 'I'):
+                    instructor_id = input("Enter Instructor ID: ")
+                    if (instructor_id[0] != 'I'):
+                        print("Invalid ID")
+                self.user.view_instructor_schedule(self.db_connection, instructor_id)
+            elif choice == '4':
+                break
+            else:
+                print("Invalid choice. Please try again.")
 
     def course_management(self):
         self.method_not_implemented()

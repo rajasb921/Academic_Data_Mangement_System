@@ -218,7 +218,6 @@ class UniversityManagementSystem:
                     print("Invalid Course ID")
 
                 self.user.add_course(self.db_connection, student_id, course_id)
-                break
 
             elif (choice == '2'):
                 student_id = " "
@@ -236,7 +235,6 @@ class UniversityManagementSystem:
                     print("Invalid Course ID")
 
                 self.user.drop_course(self.db_connection, student_id, course_id)
-                break
             elif (choice == '3'):
                 student_id = " "
                 while (student_id[0] != 'S'):
@@ -266,7 +264,6 @@ class UniversityManagementSystem:
                         print(f"--- { 'Fall' if sem == 'F' else 'Spring' } Schedule ---")
                         print(tabulate(courses, headers=headers, tablefmt="grid"))
                         print()
-                break
             elif (choice == '4'):
                 break
             else:
@@ -287,7 +284,7 @@ class UniversityManagementSystem:
             if choice == '1':
                 self.major_management()
             elif choice == '2':
-                self.view_department_details()
+                self.user.print_department_details(self.db_connection)
             elif choice == '3':
                 self.instructor_management()
             elif choice == '4':
@@ -298,10 +295,37 @@ class UniversityManagementSystem:
                 print("Invalid choice. Please try again.")
 
     def major_management(self):
-        self.method_not_implemented()
+        while True:
+            print("\n--- Major Management Menu ---")
+            print("1. Add New Major")
+            print("2. Modify Existing Major")
+            print("3. Back to Main Menu")
 
-    def view_department_details(self):
-        self.method_not_implemented()
+            choice = input("Enter your choice: ")
+
+            if (choice == '1'):
+                major_name = input("Enter new major name: ")
+                credits = "0"
+                while (credits < "120"):
+                    credits = input("Enter the required credits: ")
+                
+                credits = int(credits)
+                self.user.add_major(self.db_connection, major_name, credits)
+            elif (choice == '2'):
+                major_name = input("Enter the major name to modify: ")
+                new_major_name = input("Enter the new major name: ")
+                new_credits = "0"
+                while (new_credits < "120"):
+                    new_credits = input("Enter the new required credits: ")
+                
+                new_credits = int(new_credits)
+                self.user.modify_major(self.db_connection, major_name, new_major_name, new_credits)
+                
+            elif (choice == '3'):
+                break
+            else:
+                print("Invalid choice. Please try again")
+
 
     def instructor_management(self):
         self.method_not_implemented()

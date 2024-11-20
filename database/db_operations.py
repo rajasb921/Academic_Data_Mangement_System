@@ -475,3 +475,108 @@ def studentCourseDrop(db_connection, student_id, course_id):
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
+
+# Get the details about a department
+def getDepartmentDetails(db_connection, department_id):
+    try:
+        with db_connection.cursor() as cursor:
+            query = """
+            SELECT 
+                d.department_name,
+                COUNT(DISTINCT i.instructor_id) AS faculty_count,
+                COUNT(DISTINCT s.student_id) AS student_count,
+                COUNT(DISTINCT m.major_id) AS majors_offered,
+                d.office_number AS department_office
+            FROM 
+                public.department d
+            LEFT JOIN 
+                public.instructor i ON d.department_id = i.department_id
+            LEFT JOIN 
+                public.major m ON d.department_id = m.department_id
+            LEFT JOIN 
+                public.student s ON m.major_id = s.major_id
+            WHERE 
+                d.department_id = %s
+            GROUP BY 
+                d.department_id, d.department_name, d.office_number
+            """
+            cursor.execute(query, (department_id,))
+            
+            result = cursor.fetchone()
+            
+            if result:
+                return {
+                    'department_name': result[0],
+                    'faculty_count': result[1],
+                    'student_count': result[2],
+                    'majors_offered': result[3],
+                    'office_number': result[4]
+                }
+            else:
+                return None
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# Add a major to the department
+def addMajor(db_connection, department_id, major_name, credits):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to insert a new major into the major table
+            query = """
+                INSERT INTO major (major_name, total_credit_hours, department_id)
+                VALUES (%s, %s, %s)
+                RETURNING major_id;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (major_name, credits, department_id))
+            
+            # Fetch the generated major_id
+            major_id = cursor.fetchone()[0]
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully added major '{major_name}' with ID: {major_id}")
+            return major_id
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return None
+    
+# Modify a major in the department
+def modifyMajor(db_connection, department_id, major_name, new_major_name, new_credits):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to update the major details
+            query = """
+                UPDATE major
+                SET major_name = %s, total_credit_hours = %s
+                WHERE department_id = %s AND major_name = %s;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (new_major_name, new_credits, department_id, major_name))
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully modified major '{major_name}' to '{new_major_name}' with new credits: {new_credits}")
+            return True
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False

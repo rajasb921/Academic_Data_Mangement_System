@@ -190,3 +190,51 @@ def checkCourseDrop(db_connection, student_id, course_id):
     print("Student will not have 0 credits after dropping this course")
 
     return True
+
+# Check whether a major exists in the department
+def majorExists(db_connection, department_id, major_name):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM major
+                WHERE department_id = %s AND major_name = %s
+            """
+            cursor.execute(query, (department_id, major_name))
+            result = cursor.fetchone()
+            return result['count'] > 0
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Verify whether a major can be added
+def checkMajorAdd(db_connection, department_id, major_name, credits):
+    if majorExists(db_connection, department_id, major_name):
+        print("This major already exists in the department")
+        return False
+    print("This major does not exist in the department")
+    if credits < 120 or credits > 144:
+        print("Each major is required to have between 120 and 144 credits")
+        return False
+    return True
+
+# Verify whether a major can be changed
+def checkMajorModify(db_connection, department_id, major_name, new_major_name, new_credits):
+    if not majorExists(db_connection, department_id, major_name):
+        print("The major to be modified does not exist in the department")
+        return False
+    print("The major to be modified exists in the department")
+
+    if majorExists(db_connection, department_id, new_major_name):
+        print("The new major name already exists in the department")
+        return False
+    print("The new major name does not exist in the department")
+
+    if new_credits < 120 or new_credits > 144:
+        print("Each major is required to have between 120 and 144 credits")
+        return False
+
+    return True

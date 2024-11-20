@@ -667,3 +667,30 @@ def addCourse(db_connection, course_prefix, course_number, course_title, credits
         print(f"An error occurred: {e}")
         db_connection.rollback()  # Rollback on error
         return None
+    
+# Modify a course
+def modifyCourse(db_connection, course_prefix, course_number, new_course_name, new_credits):
+    try:
+        with db_connection.cursor() as cursor:
+            # SQL query to update the course details
+            query = """
+            UPDATE course
+            SET title = %s, credits = %s
+            WHERE course_prefix = %s AND course_number = %s;
+            """
+            # Execute the query with the provided parameters
+            cursor.execute(query, (new_course_name, new_credits, course_prefix, course_number))
+            
+            # Commit the transaction
+            db_connection.commit()
+            
+            print(f"Successfully modified course '{course_prefix} {course_number}' to '{new_course_name}' with new credits: {new_credits}")
+            return True
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_connection.rollback()  # Rollback on error
+        return False

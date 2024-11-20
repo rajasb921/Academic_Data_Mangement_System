@@ -397,13 +397,14 @@ class UniversityManagementSystem:
                                      semester, year, section_id, days, start_time, end_time)
 
             elif choice == '2':
-                course_code = input("Enter the course code to modify: ")
+                course_prefix = input("Enter the course prefix to modify: ")
+                course_number = input("Enter course number: ")
                 new_course_name = input("Enter the new course name: ")
                 new_credits = input("Enter the new number of credits: ")
 
                 if new_credits.isdigit() and int(new_credits) > 0:
                     new_credits = int(new_credits)
-                    self.user.modify_course(self.db_connection, course_code, new_course_name, new_credits)
+                    self.user.modify_course(self.db_connection, course_prefix, course_number, new_course_name, new_credits)
                     print("Course modified successfully.")
                 else:
                     print("Invalid input: Credits must be a positive number.")

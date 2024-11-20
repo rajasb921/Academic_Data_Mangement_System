@@ -128,6 +128,7 @@ class Staff(User):
         
         from database.db_verification import checkCourseAdd
         from database.db_operations import addCourse
+
         if not checkCourseAdd(db_connection, course_prefix, course_number, course_title, credits, 
                                      semester, year, section_id, days, start_time, end_time):
             print("Course cannot be added")
@@ -139,4 +140,19 @@ class Staff(User):
             return True
 
         print("Failed to add course")
+        return False
+    
+    def modify_course(self, db_connection, course_prefix, course_number, new_course_name, new_credits):
+        from database.db_verification import checkCourseModify
+        from database.db_operations import modifyCourse
+
+        if not checkCourseModify(db_connection, course_prefix, course_number, new_course_name, new_credits):
+            print("Course cannot be modified")
+            return False
+
+        if modifyCourse(db_connection, course_prefix, course_number, new_course_name, new_credits):
+            print("Course modified")
+            return True
+
+        print("Failed to modify course")
         return False

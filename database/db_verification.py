@@ -323,15 +323,15 @@ def checkCourseUpdate(db_connection, department_id, instructor_id, course_id):
 
 
 # Check whether a course exists in the department
-def courseExists(db_connection, course_prefix, course_number, semester, year):
+def courseExists(db_connection, course_prefix, course_number):
     try:
         with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
             query = """
                 SELECT COUNT(*)
                 FROM course
-                WHERE course_prefix = %s AND course_number = %s AND semester = %s AND year = %s
+                WHERE course_prefix = %s AND course_number = %s
             """
-            cursor.execute(query, (course_prefix, course_number, semester, year))
+            cursor.execute(query, (course_prefix, course_number))
             result = cursor.fetchone()
             return result['count'] > 0
     except psycopg2.Error as e:
@@ -344,12 +344,25 @@ def courseExists(db_connection, course_prefix, course_number, semester, year):
 # Verify whether a course can be added
 def checkCourseAdd(db_connection, course_prefix, course_number, course_title, credits, 
                                      semester, year, section_id, days, start_time, end_time):
-    if courseExists(db_connection, course_prefix, course_number, semester, year):
-        print("Course already exists in the department for the current semester and year")
+    if courseExists(db_connection, course_prefix, course_number):
+        print("Course already exists in the department")
         return False
-    print("Course does not exist in the department for the current semester and year")
+    print("Course does not exist in the department")
 
     if credits < 1 or credits > 4:
+        print("Each course is required to have between 1 and 4 credits")
+        return False
+
+    return True
+
+# Verify whether a course can be changed
+def checkCourseModify(db_connection, course_prefix, course_number, new_course_name, new_credits):
+    if not courseExists(db_connection, course_prefix, course_number):
+        print("Course to be modified does not exist")
+        return False
+    print("Course to be modified exists")
+
+    if new_credits < 1 or new_credits > 4:
         print("Each course is required to have between 1 and 4 credits")
         return False
 

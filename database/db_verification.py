@@ -321,3 +321,36 @@ def checkCourseUpdate(db_connection, department_id, instructor_id, course_id):
 
     return True
 
+
+# Check whether a course exists in the department
+def courseExists(db_connection, course_prefix, course_number, semester, year):
+    try:
+        with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT COUNT(*)
+                FROM course
+                WHERE course_prefix = %s AND course_number = %s AND semester = %s AND year = %s
+            """
+            cursor.execute(query, (course_prefix, course_number, semester, year))
+            result = cursor.fetchone()
+            return result['count'] > 0
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Verify whether a course can be added
+def checkCourseAdd(db_connection, course_prefix, course_number, course_title, credits, 
+                                     semester, year, section_id, days, start_time, end_time):
+    if courseExists(db_connection, course_prefix, course_number, semester, year):
+        print("Course already exists in the department for the current semester and year")
+        return False
+    print("Course does not exist in the department for the current semester and year")
+
+    if credits < 1 or credits > 4:
+        print("Each course is required to have between 1 and 4 credits")
+        return False
+
+    return True

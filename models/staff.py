@@ -111,6 +111,7 @@ class Staff(User):
         from database.db_verification import checkCourseDelete
         from database.db_operations import deleteCourseForInstructor
 
+
         if not checkCourseDelete(db_connection, self.department_id, instructor_id, course_id):
             print("Course cannot be deleted for the instructor")
             return False
@@ -120,4 +121,22 @@ class Staff(User):
             return True
 
         print("Failed to delete course for the instructor")
+        return False
+    
+    def add_course(self, db_connection, course_prefix, course_number, course_title, credits, 
+                                     semester, year, section_id, days, start_time, end_time):
+        
+        from database.db_verification import checkCourseAdd
+        from database.db_operations import addCourse
+        if not checkCourseAdd(db_connection, course_prefix, course_number, course_title, credits, 
+                                     semester, year, section_id, days, start_time, end_time):
+            print("Course cannot be added")
+            return False
+
+        if addCourse(db_connection, course_prefix, course_number, course_title, credits, 
+                                     semester, year, section_id, days, start_time, end_time):
+            print("Course added")
+            return True
+
+        print("Failed to add course")
         return False

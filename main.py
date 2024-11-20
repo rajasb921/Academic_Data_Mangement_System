@@ -372,7 +372,59 @@ class UniversityManagementSystem:
                 print("Invalid choice. Please try again.")
 
     def course_management(self):
-        self.method_not_implemented()
+        while True:
+            print("\n--- Course Management Menu ---")
+            print("1. Add New Course")
+            print("2. Modify Existing Course")
+            print("3. Delete Course")
+            print("4. Back to Main Menu")
+
+            choice = input("Enter your choice: ")
+
+            if choice == '1':
+                course_prefix = input("Enter course prefix: ")
+                course_number = input("Enter course number: ")
+                course_title = input("Enter new course title: ")
+                credits = int(input("Enter the number of credits: "))
+                semester = input("Enter the semester for the course: ")
+                year = input("Enter the year for the course: ")
+                section_id = input("Enter the section ID for the course: ")
+                days = input("Enter the days for the course: ")
+                start_time = input("Enter the start time for the course: ")
+                end_time = input("Enter the end time for the course: ")
+
+                self.user.add_course(self.db_connection, course_prefix, course_number, course_title, credits, 
+                                     semester, year, section_id, days, start_time, end_time)
+
+            elif choice == '2':
+                course_code = input("Enter the course code to modify: ")
+                new_course_name = input("Enter the new course name: ")
+                new_credits = input("Enter the new number of credits: ")
+
+                if new_credits.isdigit() and int(new_credits) > 0:
+                    new_credits = int(new_credits)
+                    self.user.modify_course(self.db_connection, course_code, new_course_name, new_credits)
+                    print("Course modified successfully.")
+                else:
+                    print("Invalid input: Credits must be a positive number.")
+
+            elif choice == '3':
+                course_code = input("Enter the course code to delete: ")
+                confirmation = input(f"Are you sure you want to delete the course '{course_code}'? (yes/no): ").lower()
+                
+                if confirmation == 'yes':
+                    self.user.delete_course(self.db_connection, course_code)
+                    print("Course deleted successfully.")
+                else:
+                    print("Course deletion canceled.")
+
+            elif choice == '4':
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+
+
 
 def main():
     university_system = UniversityManagementSystem()

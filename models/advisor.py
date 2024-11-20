@@ -21,25 +21,29 @@ class Advisor(User):
     def get_student_summary(self, db_connection, student_id):
         from database.db_operations import getStudentSummary
 
-        summary = getStudentSummary(db_connection, student_id)
+        summary, data_affected = getStudentSummary(db_connection, student_id)
         if summary is None:
             print("Summary not found")
             return None
         
-
+        self.logger.log(self.id, 'read', data_affected)
         return summary
     
 
     def add_course(self, db_connection, student_id, course_id):
-        from database.db_verification import checkCourseAdd
+        from database.db_verification import checkCourseAdd_ID
         from database.db_operations import studentCourseAdd
-        if not checkCourseAdd(db_connection, student_id, course_id):
+        if not checkCourseAdd_ID(db_connection, student_id, course_id):
             print("Course Add Failed")
             return None
         
-        flag = studentCourseAdd(db_connection, student_id, course_id)
+        flag, data_affected, old_data, new_data = studentCourseAdd(db_connection, student_id, course_id)
+        
+
         if flag:
             print("Course added successfully")
+            # Log
+            self.logger.log(self.id, 'modify', data_affected, old_data, new_data)
             return None
     
     def drop_course(self, db_connection, student_id, course_id):
@@ -49,18 +53,22 @@ class Advisor(User):
             print("Course Drop Failed")
             return None
         
-        flag = studentCourseDrop(db_connection, student_id, course_id)
+        flag, data_affected, old_data, new_data = studentCourseDrop(db_connection, student_id, course_id)
         if flag:
             print("Course dropped successfully")
+            # Log
+            self.logger.log(self.id, 'delete', data_affected, old_data, new_data)
             return None
     
     def view_registration(self, db_connection, student_id):
         from database.db_operations import getStudentCourseSchedule
 
         # Fetch schedule
-        schedule = getStudentCourseSchedule(db_connection, student_id)
+        schedule, data_affected = getStudentCourseSchedule(db_connection, student_id)
         if schedule is None:
             print("Schedule not found")
             return
         
+        # Log
+        self.logger.log(self.id, 'read', data_affected)
         return schedule

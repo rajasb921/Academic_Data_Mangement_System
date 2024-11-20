@@ -89,14 +89,14 @@ class Instructor(User):
         from database.db_operations import getInstructorCourseSchedule
         from database.db_operations import getMajorDistribution
 
-        schedule = getInstructorCourseSchedule(db_connection, self.id)
+        schedule , data_affected_sched = getInstructorCourseSchedule(db_connection, self.id)
         if schedule is None:
             print("Schedule not found")
             return
         
         major_distributions = []
         for course in schedule:
-            major_dist = getMajorDistribution(db_connection, course["course_id"])
+            major_dist, data_affected_major = getMajorDistribution(db_connection, course["course_id"])
             major_distributions.append({
                 "course_code": course["course_code"],
                 "course_title": course["course_title"], 
@@ -118,3 +118,7 @@ class Instructor(User):
                 print(tabulate(table, headers=headers, tablefmt="grid"))
                 print()
                 print()
+
+        # Log
+        data_affected = list(set(data_affected_sched + data_affected_major))
+        self.logger.log(self.id, 'read', data_affected)

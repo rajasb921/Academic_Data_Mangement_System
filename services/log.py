@@ -11,13 +11,7 @@ class FileLogger:
         formatted_data = ', '.join(data_affected)
         log_message = f"{timestamp} | User: {user_id} | Operation: {operation_type} | Data: {formatted_data}"
         
-        if operation_type == 'modify':
+        if operation_type == 'modify' or operation_type == 'delete':
             log_message += f" | Old Value: {old_value} | New Value: {new_value}"
         
         logging.info(log_message)
-
-# Example usage:
-# logger = FileLogger()
-# logger.log(user_id='user123', operation_type='read', data_affected='record_1')
-# logger.log(user_id='user123', operation_type='write', data_affected='record_2')
-# logger.log(user_id='user123', operation_type='modify', data_affected='record_3', old_value='old_data', new_value='new_data')

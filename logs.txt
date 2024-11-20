@@ -3,3 +3,15 @@
 2024-11-20 10:17:59 | User: S01234567 | Operation: read | Data: enrollment.student_id, course.course_id
 2024-11-20 10:20:30 | User: I003      | Operation: read | Data: course.instructor_id, course.course_id
 2024-11-20 10:36:15 | User: I003      | Operation: read | Data: course.course_id, enrollment.student_id
+2024-11-20 11:28:28 | User: I003      | Operation: read | Data: enrollment.student_id, course.course_id, course.instructor_id, major.major_id, student.student_id
+2024-11-20 11:31:41 | User: A001      | Operation: read | Data: student.student_id, major.major_id
+2024-11-20 11:57:23 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 11:59:26 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 11:59:39 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 12:09:52 | User: A001      | Operation: modify | Data: enrollment.student_id, enrollment.course_id, student.total_credits | Old Value: {'student_id': 'S01234567', 'course_id': 2, 'total_credits': 3} | New Value: {'student_id': 'S01234567', 'course_id': 2, 'total_credits': 3}
+2024-11-20 12:14:16 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 12:15:02 | User: A001      | Operation: modify | Data: enrollment.student_id, enrollment.course_id, student.total_credits | Old Value: {'total_credits': 45, 'enrollment_count': 3} | New Value: {'total_credits': 48, 'enrollment_count': 4}
+2024-11-20 12:15:11 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 12:27:45 | User: A001      | Operation: read | Data: enrollment.student_id, course.course_id
+2024-11-20 12:27:53 | User: A001      | Operation: modify | Data: enrollment.student_id, enrollment.course_id, student.total_credits | Old Value: {'total_credits': 45, 'enrollment_count': 3} | New Value: {'total_credits': 48, 'enrollment_count': 4}
+2024-11-20 12:28:06 | User: A001      | Operation: delete | Data: enrollment.student_id, enrollment.course_id, student.total_credits | Old Value: {'total_credits': 48, 'enrollment_count': 4} | New Value: {'total_credits': 45, 'enrollment_count': 3}

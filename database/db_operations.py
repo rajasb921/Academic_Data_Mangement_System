@@ -344,7 +344,9 @@ def getMajorDistribution(db_connection, course_id):
                         "percentage": result[2]
                     } for result in results
                 ]
-                return major_distribution
+
+                data_affected = ["enrollment.student_id", "student.student_id", "course.course_id", "major.major_id"]
+                return major_distribution, data_affected
             else:
                 print("No major distribution data found for the given course ID.")
                 return None
@@ -378,12 +380,13 @@ def getStudentSummary(db_connection, student_id):
             result = cursor.fetchone()
             
             if result:
+                data_affected = ["student.student_id", "major.major_id"]
                 return {
                     'name': result[0],
                     'major': result[1],
                     'completed_credits': result[2],
                     'gpa': result[3]
-                }
+                }, data_affected
             else:
                 return None
 
@@ -397,8 +400,24 @@ def getStudentSummary(db_connection, student_id):
 # Add a student to a course
 def studentCourseAdd(db_connection, student_id, course_id):
     try:
-
         with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Capture old data before changes
+            cursor.execute("""
+                SELECT total_credits 
+                FROM student 
+                WHERE student_id = %s
+            """, (student_id,))
+            old_student = cursor.fetchone()
+
+            cursor.execute("""
+                SELECT COUNT(*) as enrollment_count
+                FROM enrollment 
+                WHERE student_id = %s
+            """, (student_id,))
+            old_enrollments = cursor.fetchone()
+
+            # Rest of the existing function remains the same...
+            
             # Get the credits for the course
             cursor.execute("""
                 SELECT credits
@@ -426,9 +445,39 @@ def studentCourseAdd(db_connection, student_id, course_id):
                 WHERE student_id = %s
             """, (course_credits, student_id))
 
+            # Capture new data after changes
+            cursor.execute("""
+                SELECT total_credits 
+                FROM student 
+                WHERE student_id = %s
+            """, (student_id,))
+            new_student = cursor.fetchone()
+
+            cursor.execute("""
+                SELECT COUNT(*) as enrollment_count
+                FROM enrollment 
+                WHERE student_id = %s
+            """, (student_id,))
+            new_enrollments = cursor.fetchone()
+
             # Explicitly commit the transaction
             db_connection.commit()
-            return True
+
+            # Prepare old and new data
+            old_data = {
+                'total_credits': old_student['total_credits'] if old_student else 0,
+                'enrollment_count': old_enrollments['enrollment_count']
+            }
+            
+            new_data = {
+                'total_credits': new_student['total_credits'],
+                'enrollment_count': new_enrollments['enrollment_count']
+            }
+
+            # Data affected
+            data_affected = ["enrollment.student_id", "enrollment.course_id", "student.total_credits"]
+
+            return True, data_affected, old_data, new_data
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")
@@ -442,6 +491,21 @@ def studentCourseAdd(db_connection, student_id, course_id):
 def studentCourseDrop(db_connection, student_id, course_id):
     try:
         with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Capture old data before changes
+            cursor.execute("""
+                SELECT total_credits 
+                FROM student 
+                WHERE student_id = %s
+            """, (student_id,))
+            old_student = cursor.fetchone()
+
+            cursor.execute("""
+                SELECT COUNT(*) as enrollment_count
+                FROM enrollment 
+                WHERE student_id = %s
+            """, (student_id,))
+            old_enrollments = cursor.fetchone()
+
             # Get the credits for the course
             cursor.execute("""
                 SELECT credits
@@ -469,9 +533,46 @@ def studentCourseDrop(db_connection, student_id, course_id):
                 WHERE student_id = %s
             """, (course_credits, student_id))
 
+            # Capture new data after changes
+            cursor.execute("""
+                SELECT total_credits 
+                FROM student 
+                WHERE student_id = %s
+            """, (student_id,))
+            new_student = cursor.fetchone()
+
+            cursor.execute("""
+                SELECT COUNT(*) as enrollment_count
+                FROM enrollment 
+                WHERE student_id = %s
+            """, (student_id,))
+            new_enrollments = cursor.fetchone()
+
             # Explicitly commit the transaction
             db_connection.commit()
-            return True
+
+            # Prepare old and new data
+            old_data = {
+                'total_credits': old_student['total_credits'] if old_student else 0,
+                'enrollment_count': old_enrollments['enrollment_count']
+            }
+            
+            new_data = {
+                'total_credits': new_student['total_credits'],
+                'enrollment_count': new_enrollments['enrollment_count']
+            }
+
+            # Data affected
+            data_affected = ["enrollment.student_id", "enrollment.course_id", "student.total_credits"]
+
+            return True, data_affected, old_data, new_data
+
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
 
     except psycopg2.Error as e:
         print(f"Database error: {e}")

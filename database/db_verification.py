@@ -154,7 +154,7 @@ def noCredits(db_connection, student_id, course_id):
         return None
 
 # Verify whether the student can take a given course
-def checkCourseAdd(db_connection, student_id, course_id):
+def checkCourseAdd_ID(db_connection, student_id, course_id):
     enrolled = isEnrolled(db_connection, student_id, course_id)
     if enrolled:
         print("Student already enrolled in this course")
